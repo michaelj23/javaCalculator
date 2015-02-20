@@ -20,7 +20,11 @@ public class calc {
 
 	}
 
-	public static ArrayList<String> parse(String input) {
+	private static Pair analyze(ArrayList<String> parsed) {
+		
+	}
+
+	private static ArrayList<String> parse(String input) {
 		/* Parses user input into separate tokens in a String ArrayList. 
 		Assumes that whitespace does not matter. Ensures that all symbols are valid.*/
 		ArrayList<String> tokens = new ArrayList<String>();
