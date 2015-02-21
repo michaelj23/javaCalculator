@@ -10,4 +10,14 @@ public class Pair{
 	public Pair() {
 		this(null, null);
 	}
+
+	public String toString() {
+		Pair runner = this;
+		String ret = "(";
+		while (runner != null) {
+			ret += "Pair:" + runner.head.toString() + ", ";
+			runner = runner.tail;
+		}
+		return ret + "null)";
+	}
 }

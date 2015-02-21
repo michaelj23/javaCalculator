@@ -1,13 +1,28 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.*;
 
 public class calc {
-	private static final String[] KEYWORDS = {"add", "sub", "mult", "div", "let"};
+
+	/* Hash map containing all the calculator's operators as keys and each operator's number of arguments as values. */
+	private static final HashMap<String, Integer> OPERATORS;
+	static {
+		OPERATORS = new HashMap<String, Integer>();
+		OPERATORS.put("add", 2);
+		OPERATORS.put("sub", 2);
+		OPERATORS.put("mult", 2);
+		OPERATORS.put("div", 2);
+		OPERATORS.put("let", 3);
+	}
 
 	public static void main(String[] args) {
 		try {
 			ArrayList<String> parsed = parse(args[0]);
+			print(parsed);
+			Object analyzed = read(parsed, true);
+			System.out.println(analyzed);
 			// Pair command = makePair(parsed);
 			// for (int i = 0; i < parsed.size(); i++) {
 			// 	System.out.print(parsed.get(i) + " ");
@@ -20,30 +35,80 @@ public class calc {
 
 	}
 
-	private static Pair analyze(ArrayList<String> parsed) {
-		
+	private static Object read(ArrayList<String> parsed, boolean isOuter) {
+		/* Converts a parsed ArrayList into an Object that can be evaluated. If the input is
+		only an integer or a character, returns it. If it is an expression, returns a Pair instance
+		by calling READTAIL. Also keeps track of whether you are reading the outermost expression. */
+		try {
+			String curr = parsed.remove(0);
+			char test = curr.charAt(0);
+			if (OPERATORS.containsKey(curr)) {
+				if (!"(".equals(parsed.remove(0))) {
+					throw new Exception();
+				}
+				return new Pair(curr, readTail(parsed, curr, isOuter));
+			}
+			if (Character.isDigit(test) || test == '-') {
+				return new Integer(curr);
+			}
+			if (Character.isLetter(test)) {
+				return curr;
+			}
+			throw new Exception();
+		} catch (Exception e) {
+			System.out.println("Invalid expression");
+			System.exit(0);
+		}
+		return null;
+	}
+
+	private static Pair readTail(ArrayList<String> rest, String key, boolean isOuter) {
+		/* Recursively calls READ on all of operator KEY's arguments and makes sure
+		that a comma follows every argument and an end parenthesis exists after the last
+		argument. If READTAIL is called on the outermost expression, checks that nothing follows
+		the last parenthesis. Returns the resulting Pair. */
+		try {
+			int numArgs = OPERATORS.get(key);
+			if (numArgs == 0) {
+				return null;
+			}
+			Pair ret = new Pair(read(rest, false), null);
+			Pair runner = ret;
+			while (numArgs > 1) {
+				if (!",".equals(rest.remove(0))) {
+					throw new Exception();
+				}
+				runner.tail = new Pair(read(rest, false), null);
+				runner = runner.tail;
+				numArgs -= 1;
+			}
+			if (!")".equals(rest.remove(0))) {
+				throw new Exception();
+			}
+			if (isOuter && rest.size() != 0) {
+				throw new Exception();
+			}
+			return ret;
+		} catch (Exception e) {
+			System.out.println("Invalid expression");
+			System.exit(0);
+		}
+		return null;
 	}
 
 	private static ArrayList<String> parse(String input) {
 		/* Parses user input into separate tokens in a String ArrayList. 
 		Assumes that whitespace does not matter. Ensures that all symbols are valid.*/
 		ArrayList<String> tokens = new ArrayList<String>();
-		int count = 0;
-		// boolean subExpression = false;
+		int count = 0; //maybe take out count and just shorten input every time in the while loop
 		char target;
-		// char next;
 		String keyword;
+		String number;
 		try {
 			while (count < input.length()) {
-				print(tokens);
-				keyword = keywordNext(input.substring(count));
+				keyword = operatorNext(input.substring(count));
 				if (keyword != null) {
-					// next = input.charAt(count + 1);
-					// if (next != '(') {
-					// 	throw new Exception();
-					// }
 					tokens.add(keyword);
-					// subExpression = true;
 					count += keyword.length() - 1;
 				}
 				else {
@@ -52,18 +117,20 @@ public class calc {
 						if (!isProperSymbol(target)) {
 							throw new Exception("Invalid symbol");
 						}
-						// if (isCharacter(target)) {
-
-						// 	target = (int)target;
-						// 	next = input.charAt(count + 1);
-						// 	if (subExpression) {
-						// 		next = input.charAt(count + 1);
-						// 		if (next != ',' && next != ')') {
-						// 			throw new Exception();
-						// 		}
-						// 	}
-						// }
-						tokens.add(String.valueOf(target));
+						if (target == '-') {
+							number = makeStringNumber(input.substring(count+1));
+							if (number.length() == 0) {
+								throw new Exception("Invalid symbol");
+							}
+							tokens.add(target + number);
+							count += number.length();
+						} else if (Character.isDigit(target)) {
+							number = makeStringNumber(input.substring(count));
+							tokens.add(number);
+							count += number.length() - 1;
+						} else {
+							tokens.add(String.valueOf(target));
+						}
 					}
 				}
 				count += 1;
@@ -76,12 +143,27 @@ public class calc {
 		return tokens;
 	}
 
-	private static String keywordNext(String input) {
+	private static String makeStringNumber(String input) {
+		/* Deals with multi-character integers, like 24 or 123. Returns a String of the
+		next multi-character integer in input starting from the beginning. */
+		String ret = "";
+		int count = 0;
+		while (count < input.length() && Character.isDigit(input.charAt(count))) {
+			ret += input.charAt(count);
+			count += 1;
+		}
+		return ret;
+	}
+
+	private static String operatorNext(String input) {
+		/* Checks whether input has an operator at the front. If so, returns it. Otherwise
+		returns null. */
 		String ret = null;
 		try {
-			for (String s : KEYWORDS) {
-				if (s.equals(input.substring(0, 3)) || s.equals(input.substring(0, 4))) {
-					ret = s;
+			for (Map.Entry<String, Integer> s : OPERATORS.entrySet()) {
+				if (input.indexOf(s.getKey()) == 0) {
+					ret = s.getKey();
+					break;
 				}
 			}
 		}
@@ -91,7 +173,8 @@ public class calc {
 	}
 
 	private static boolean isProperSymbol(char a) {
-		return Character.isLetterOrDigit(a) || a == '(' || a == ')' || a == ',';
+		/* Checks that a character is a valid symbol for the calculator. */
+		return Character.isLetterOrDigit(a) || a == '(' || a == ')' || a == ',' || a == '-';
 	}
 
 	//print is for debugging purposes
