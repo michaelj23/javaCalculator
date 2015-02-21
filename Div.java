@@ -8,6 +8,7 @@ public class Div extends Operator {
 			}
 		} catch (ArithmeticException e) {
 			System.out.println("Can't divide by 0");
+			System.exit(0);
 		}
 		return args[0] / args[1];
 	}
