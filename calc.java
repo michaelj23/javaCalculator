@@ -2,21 +2,22 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.*;
 
 public class calc {
 
-	/* Hash map containing all the calculator's operators as keys and each operator's number of arguments as values. 
-	If an operator's number of arguments is -1, it means that the operator does not have a limit on number of arguments. */
-	private static final HashMap<String, Integer> OPERATORS;
+	/* Hash map containing all the calculator's operators as keys and each operator's class as values. */
+	private static final HashMap<String, Operator> OPERATORS;
 	static {
-		OPERATORS = new HashMap<String, Integer>();
-		OPERATORS.put("add", 2);
-		OPERATORS.put("sub", 2);
-		OPERATORS.put("mult", 2);
-		OPERATORS.put("div", 2);
-		OPERATORS.put("let", -1);
+		OPERATORS = new HashMap<String, Operator>();
+		OPERATORS.put("add", new Add());
+		OPERATORS.put("sub", new Sub());
+		OPERATORS.put("mult", new Mult());
+		OPERATORS.put("div", new Div());
+		OPERATORS.put("let", new Let());
 	}
+
+	/* Hash map containing all bindings fixed during the current calculation. */
+	public static final HashMap<String, Integer> BINDINGS = new HashMap<String, Integer>();
 
 	public static void main(String[] args) {
 		try {
@@ -36,6 +37,7 @@ public class calc {
 
 	}
 
+
 	private static Object read(ArrayList<String> parsed, boolean isOuter) {
 		/* Converts a parsed ArrayList into an Object that can be evaluated. If the input is
 		only an integer or a character, returns it. If it is an expression, returns a Pair instance
@@ -45,7 +47,7 @@ public class calc {
 			char test = curr.charAt(0);
 			if (OPERATORS.containsKey(curr)) {
 				if (!"(".equals(parsed.remove(0))) {
-					throw new Exception();
+					throw new Exception("( expected");
 				}
 				return new Pair(curr, readTail(parsed, curr, isOuter));
 			}
@@ -57,7 +59,12 @@ public class calc {
 			}
 			throw new Exception();
 		} catch (Exception e) {
-			System.out.println("Invalid expression");
+			String message = e.getMessage();
+			if (message == null) {
+				System.out.println("Invalid expression");
+			} else {
+				System.out.println(message);
+			}
 			System.exit(0);
 		}
 		return null;
@@ -68,35 +75,38 @@ public class calc {
 		that a comma follows every argument and an end parenthesis exists after the last
 		argument. If READTAIL is called on the outermost expression, checks that nothing follows
 		the last parenthesis. Returns the resulting Pair. */
+		Pair ret = null;
 		try {
-			int numArgs = OPERATORS.get(key);
+			int numArgs = OPERATORS.get(key).getNumArgs();
 			if (numArgs == 0) {
 				return null;
 			}
-			Pair ret = new Pair(read(rest, false), null);
+			ret = new Pair(read(rest, false), null);
 			Pair runner = ret;
-			while (numArgs > 1 || (numArgs == -1 && !")".equals(rest.get(0)))) {
+			while (numArgs > 1) {
 				if (!",".equals(rest.remove(0))) {
-					throw new Exception();
+					throw new Exception(", expected after argument");
 				}
 				runner.tail = new Pair(read(rest, false), null);
 				runner = runner.tail;
-				if (numArgs != -1) {
-					numArgs -= 1;
-				}
+				numArgs -= 1;
 			}
 			if (!")".equals(rest.remove(0))) {
-				throw new Exception();
+				throw new Exception(") expected at end of expression");
 			}
-			if (isOuter && rest.size() != 0) {
-				throw new Exception();
+			if (isOuter && !rest.isEmpty()) {
+				throw new Exception("unexpected additional characters");
 			}
-			return ret;
 		} catch (Exception e) {
-			System.out.println("Invalid expression");
+			String message = e.getMessage();
+			if (message == null) {
+				System.out.println("Invalid expression");
+			} else {
+				System.out.println(message);
+			}
 			System.exit(0);
 		}
-		return null;
+		return ret;
 	}
 
 	private static ArrayList<String> parse(String input) {
@@ -163,7 +173,7 @@ public class calc {
 		returns null. */
 		String ret = null;
 		try {
-			for (Map.Entry<String, Integer> s : OPERATORS.entrySet()) {
+			for (Map.Entry<String, Operator> s : OPERATORS.entrySet()) {
 				if (input.indexOf(s.getKey()) == 0) {
 					ret = s.getKey();
 					break;
