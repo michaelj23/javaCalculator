@@ -5,21 +5,21 @@ public class Let extends Operator {
 		numArgs = 3;
 	}
 
-	public Integer apply(Object[] args) {
-		/* If the first and second arguments are valid types, adds a new binding between
-		them. */
+	public void assign(Pair exp) {
+		/* Creates a new binding between the first and second item in exp.*/
 		try {
-			if (!(args[0] instanceof String)) {
+			if (!(exp.head instanceof String)) {
 				throw new Exception("Invalid variable in let expression");
 			}
-			if (!(args[1] instanceof Integer)) {
-				throw new Exception("Invalid value assigned to variable");
-			}
-			calc.BINDINGS.put((String)args[0], (Integer)args[1]);
+			calc.BINDINGS.put((String)exp.head, calc.eval(exp.tail.head));
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(0);
 		}
+	}
+
+	public Integer apply(Integer[] args) {
+		/* Not used in Let since Let itself does not actually do any application. */
 		return null;
 	}
 

@@ -22,14 +22,8 @@ public class calc {
 	public static void main(String[] args) {
 		try {
 			ArrayList<String> parsed = parse(args[0]);
-			print(parsed);
 			Object analyzed = read(parsed, true);
-			System.out.println(analyzed);
-			// Pair command = makePair(parsed);
-			// for (int i = 0; i < parsed.size(); i++) {
-			// 	System.out.print(parsed.get(i) + " ");
-			// }
-
+			System.out.println(eval(analyzed));
 		} catch (IndexOutOfBoundsException e) {
 			System.out.println("Please enter a command!");
 			System.exit(0);
@@ -37,6 +31,45 @@ public class calc {
 
 	}
 
+	public static Integer eval(Object exp) {
+		/* Evaluates the Object returned by READ. If Object is an Integer, returns it.
+		If it is a variable, looks it up in BINDINGS. If it is an expression represented
+		by a Pair instance, evaluates each operand and applies the expression's operator
+		to the operands UNLESS operator is a Let. In this special case, first creates a 
+		new binding between the first and second argument. */
+		try {
+			if (exp instanceof Integer) {
+				return (Integer)exp;
+			}
+			if (exp instanceof String) {
+				if (BINDINGS.containsKey((String)exp)) {
+					return BINDINGS.get((String)exp);
+				}
+				throw new Exception("Invalid symbol");
+			}
+			if (exp instanceof Pair) {
+				Pair temp = (Pair)exp;
+				Operator operator = OPERATORS.get(temp.head);
+				temp = temp.tail;
+				//specail evaluation process for let
+				if (operator instanceof Let) {
+					((Let)operator).assign(temp);
+					temp = temp.tail.tail;
+					return eval(temp.head);
+				}
+				Integer[] operands = new Integer[operator.getNumArgs()];
+				for (int i = 0; i < operands.length; i++) {
+					operands[i] = eval(temp.head);
+					temp = temp.tail;
+				}
+				return operator.apply(operands);
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(0);
+		}
+		return null;
+	}
 
 	private static Object read(ArrayList<String> parsed, boolean isOuter) {
 		/* Converts a parsed ArrayList into an Object that can be evaluated. If the input is
