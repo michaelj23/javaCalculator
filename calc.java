@@ -6,7 +6,8 @@ import java.io.*;
 
 public class calc {
 
-	/* Hash map containing all the calculator's operators as keys and each operator's number of arguments as values. */
+	/* Hash map containing all the calculator's operators as keys and each operator's number of arguments as values. 
+	If an operator's number of arguments is -1, it means that the operator does not have a limit on number of arguments. */
 	private static final HashMap<String, Integer> OPERATORS;
 	static {
 		OPERATORS = new HashMap<String, Integer>();
@@ -14,7 +15,7 @@ public class calc {
 		OPERATORS.put("sub", 2);
 		OPERATORS.put("mult", 2);
 		OPERATORS.put("div", 2);
-		OPERATORS.put("let", 3);
+		OPERATORS.put("let", -1);
 	}
 
 	public static void main(String[] args) {
@@ -74,13 +75,15 @@ public class calc {
 			}
 			Pair ret = new Pair(read(rest, false), null);
 			Pair runner = ret;
-			while (numArgs > 1) {
+			while (numArgs > 1 || (numArgs == -1 && !")".equals(rest.get(0)))) {
 				if (!",".equals(rest.remove(0))) {
 					throw new Exception();
 				}
 				runner.tail = new Pair(read(rest, false), null);
 				runner = runner.tail;
-				numArgs -= 1;
+				if (numArgs != -1) {
+					numArgs -= 1;
+				}
 			}
 			if (!")".equals(rest.remove(0))) {
 				throw new Exception();

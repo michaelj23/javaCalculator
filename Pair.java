@@ -20,4 +20,11 @@ public class Pair{
 		}
 		return ret + "null)";
 	}
+
+	public int length() {
+		if (tail == null) {
+			return 1;
+		}
+		return 1 + tail.length();
+	}
 }
