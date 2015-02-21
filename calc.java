@@ -146,7 +146,7 @@ public class calc {
 		/* Parses user input into separate tokens in a String ArrayList. 
 		Assumes that whitespace does not matter. Ensures that all symbols are valid.*/
 		ArrayList<String> tokens = new ArrayList<String>();
-		int count = 0; //maybe take out count and just shorten input every time in the while loop
+		int count = 0;
 		char target;
 		String keyword;
 		String number;
@@ -205,15 +205,11 @@ public class calc {
 		/* Checks whether input has an operator at the front. If so, returns it. Otherwise
 		returns null. */
 		String ret = null;
-		try {
-			for (Map.Entry<String, Operator> s : OPERATORS.entrySet()) {
-				if (input.indexOf(s.getKey()) == 0) {
-					ret = s.getKey();
-					break;
-				}
+		for (Map.Entry<String, Operator> s : OPERATORS.entrySet()) {
+			if (input.indexOf(s.getKey()) == 0) {
+				ret = s.getKey();
+				break;
 			}
-		}
-		catch (Exception e) {
 		}
 		return ret;
 	}
