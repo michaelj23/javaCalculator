@@ -71,7 +71,7 @@ public class calc {
 		return null;
 	}
 
-	private static Object read(ArrayList<String> parsed, boolean isOuter) {
+	public static Object read(ArrayList<String> parsed, boolean isOuter) {
 		/* Converts a parsed ArrayList into an Object that can be evaluated. If the input is
 		only an integer or a character, returns it. If it is an expression, returns a Pair instance
 		by calling READTAIL. Also keeps track of whether you are reading the outermost expression. */
@@ -83,6 +83,9 @@ public class calc {
 					throw new Exception("( expected");
 				}
 				return new Pair(curr, readTail(parsed, curr, isOuter));
+			}
+			if (isOuter && !parsed.isEmpty()) {
+				throw new Exception("unexpected additional characters");
 			}
 			if (Character.isDigit(test) || test == '-') {
 				return new Integer(curr);
@@ -142,7 +145,7 @@ public class calc {
 		return ret;
 	}
 
-	private static ArrayList<String> parse(String input) {
+	public static ArrayList<String> parse(String input) {
 		/* Parses user input into separate tokens in a String ArrayList. 
 		Assumes that whitespace does not matter. Ensures that all symbols are valid.*/
 		ArrayList<String> tokens = new ArrayList<String>();
