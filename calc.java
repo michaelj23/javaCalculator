@@ -1,3 +1,5 @@
+package ju.michael.app;
+
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.HashMap;

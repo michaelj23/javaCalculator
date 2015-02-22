@@ -1,3 +1,5 @@
+package ju.michael.app;
+
 public class Pair{
 	/* A LinkedList class used for syntactic analysis. */
 	public Object head;

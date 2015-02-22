@@ -1,3 +1,5 @@
+package ju.michael.app;
+
 public class Let extends Operator {
 	/* The Let operator. */ 
 

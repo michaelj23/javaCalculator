@@ -1,3 +1,5 @@
+package ju.michael.app;
+
 public class Div extends Operator {
 	/* The division operator. */
 

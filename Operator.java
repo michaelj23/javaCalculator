@@ -1,3 +1,5 @@
+package ju.michael.app;
+
 public abstract class Operator {
 	/* Class from which all operators inherit. */
 	protected int numArgs = 2;

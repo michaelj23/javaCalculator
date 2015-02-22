@@ -1,3 +1,5 @@
+package ju.michael.app;
+
 public class Sub extends Operator {
 	/* The subtraction operator. */
 

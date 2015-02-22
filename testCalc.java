@@ -1,3 +1,5 @@
+package ju.michael.app;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 import java.util.ArrayList;
@@ -37,6 +39,6 @@ public class testCalc {
 
 
 	public static void main(String[] args) {
-		jh61b.junit.textui.runClasses(testCalc.class);
+		org.junit.runner.JUnitCore.main("TestCalculator");
 	}
 }

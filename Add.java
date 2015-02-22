@@ -1,3 +1,5 @@
+package ju.michael.app;
+
 public class Add extends Operator {
 	/* The Add operator. */
 
