@@ -39,6 +39,6 @@ public class testCalc {
 
 
 	public static void main(String[] args) {
-		org.junit.runner.JUnitCore.main("TestCalculator");
+		org.junit.runner.JUnitCore.main("ju.michael.app.testCalc");
 	}
 }
